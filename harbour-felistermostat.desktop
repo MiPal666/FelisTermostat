@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Michal Kasík (MiPal)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[Desktop Entry]
+Type=Application
+Name=FelisTermostat
+Exec=harbour-felistermostat
+Icon=harbour-felistermostat
+X-Nemo-Application-Type=silica-qt5
+
+[X-Sailjail]
+OrganizationName=cz.feliscatus
+ApplicationName=felistermostat
+Permissions=Internet

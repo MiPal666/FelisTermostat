@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Versions from the aarch64 wheels tested with FelisTermostat 1.0.0-24.
+certifi==2026.10.23
+cffi==2.1.1
+charset-normalizer==3.5.2
+colorama==0.4.6
+cryptography==50.0.2
+idna==3.20
+pycparser==3.12
+requests==2.34.2
+tinytuya==1.21.1
+urllib3==2.8.0

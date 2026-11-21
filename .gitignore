@@ -1,0 +1,42 @@
+# Python and test caches
+/.venv/
+/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Tuya credentials, snapshots and local configuration
+snapshot.json
+devices.json
+tinytuya.json
+tuya-raw*.json
+before_receiver_test.json
+after_receiver_test.json
+thermostat.local.json
+thermostat.json
+.env
+.env.*
+!.env.example
+*local*.json
+*secret*.json
+*credentials*.json
+
+# Local tooling
+/.aws/
+/.codex/
+/.agents/
+
+# Build output and temporary files
+/build/
+/dist/
+/build-felistermostat.*/
+/vendor-site.tar.gz
+/RPMS/
+/SRPMS/
+*.rpm
+/.qmake.stash
+/Makefile
+/translations/*.qm
+*.log
+*.tmp
+*.bak
