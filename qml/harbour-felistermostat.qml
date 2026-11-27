@@ -795,7 +795,7 @@ ApplicationWindow {
                 anchors.rightMargin: Theme.horizontalPageMargin
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: Theme.paddingSmall
-                text: Qt.application.version
+                text: Qt.application.version.split("-")[0]
                 color: Theme.secondaryColor
                 font.pixelSize: Theme.fontSizeExtraSmall
             }

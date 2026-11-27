@@ -3,8 +3,8 @@
 
 Name:       harbour-felistermostat
 Summary:    Local EMOS GoSmart thermostat control for Sailfish OS
-Version:    1.0.0
-Release:    26
+Version:    1.0.1
+Release:    1
 License:    GPL-3.0-or-later
 Source0:    %{name}-%{version}.tar.bz2
 ExclusiveArch: aarch64
