@@ -286,8 +286,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
         <translation>Ověřuji změnu…</translation>
     </message>
     <message>
-        <source>Current temperature %1</source>
-        <translation>Aktuální teplota %1</translation>
+        <source>Current temperature</source>
+        <translation>Aktuální teplota</translation>
+    </message>
+    <message>
+        <source>Heating mode</source>
+        <translation>Režim vytápění</translation>
     </message>
     <message>
         <source>Thermostat</source>

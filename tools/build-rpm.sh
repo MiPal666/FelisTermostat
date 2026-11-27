@@ -12,7 +12,7 @@ fi
 project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 target=${2:-SailfishOS-5.1.0.11-aarch64.default}
 stage_dir=$(bash "$project_dir/tools/stage-rpm.sh" "$1")
-(cd -- "$stage_dir" && sfdk -c "target=$target" build)
+(cd -- "$stage_dir" && sfdk -c "target=$target" -c no-fix-version build)
 
 shopt -s globstar nullglob
 packages=("$stage_dir"/RPMS/**/*.aarch64.rpm)

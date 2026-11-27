@@ -578,6 +578,24 @@ ApplicationWindow {
                                         dial.dragAngle = fingerAngle + grabOffset
                                     }
 
+                                    function startDrag() {
+                                        holdTimer.stop()
+                                        dial.dragAngle = dial.handleAngle
+                                        fingerAngle = dial.nearestAngle(angleAt(pressX, pressY), dial.dragAngle)
+                                        grabOffset = dial.dragAngle - fingerAngle
+                                        dial.dragging = true
+                                    }
+
+                                    function startsAlongDial(dx, dy) {
+                                        // Leave vertical swipes to the page unless the handle was held.
+                                        if (Math.abs(dy) > Math.abs(dx) * 1.25)
+                                            return false
+                                        var angle = dial.handleAngle * Math.PI / 180
+                                        var tangent = -dx * Math.sin(angle) + dy * Math.cos(angle)
+                                        var radial = dx * Math.cos(angle) + dy * Math.sin(angle)
+                                        return Math.abs(tangent) > Math.abs(radial)
+                                    }
+
                                     function resetGesture() {
                                         holdTimer.stop()
                                         dial.dragging = false
@@ -586,15 +604,10 @@ ApplicationWindow {
 
                                     Timer {
                                         id: holdTimer
-                                        interval: 350
+                                        interval: 160
                                         onTriggered: {
-                                            if (!dialTouch.pressed || !dialTouch.enabled)
-                                                return
-                                            dial.dragAngle = dial.handleAngle
-                                            dialTouch.fingerAngle = dial.nearestAngle(
-                                                dialTouch.angleAt(dialTouch.pressX, dialTouch.pressY), dial.dragAngle)
-                                            dialTouch.grabOffset = dial.dragAngle - dialTouch.fingerAngle
-                                            dial.dragging = true
+                                            if (dialTouch.pressed && dialTouch.enabled)
+                                                dialTouch.startDrag()
                                         }
                                     }
 
@@ -602,7 +615,7 @@ ApplicationWindow {
                                         var angle = dial.handleAngle * Math.PI / 180
                                         var handleX = width / 2 + Math.cos(angle) * dial.trackRadius
                                         var handleY = height / 2 + Math.sin(angle) * dial.trackRadius
-                                        var touchRadius = Math.max(width * 0.065, Theme.fontSizeSmall)
+                                        var touchRadius = Math.max(width * 0.09, Theme.itemSizeSmall / 2)
                                         if (distance(mouse.x - handleX, mouse.y - handleY) > touchRadius) {
                                             mouse.accepted = false
                                             return
@@ -612,11 +625,18 @@ ApplicationWindow {
                                         holdTimer.restart()
                                     }
                                     onPositionChanged: {
-                                        var moved = distance(mouse.x - pressX, mouse.y - pressY) > Theme.paddingSmall
-                                        if (!dial.dragging) {
-                                            if (moved)
+                                        if (!pressed)
+                                            return
+                                        var dx = mouse.x - pressX
+                                        var dy = mouse.y - pressY
+                                        var moved = distance(dx, dy) > Theme.paddingSmall * 0.65
+                                        if (holdTimer.running && moved) {
+                                            if (startsAlongDial(dx, dy))
+                                                startDrag()
+                                            else
                                                 holdTimer.stop()
-                                        } else if (movedAlongDial || moved) {
+                                        }
+                                        if (dial.dragging && (movedAlongDial || moved)) {
                                             movedAlongDial = true
                                             updateDrag(mouse.x, mouse.y)
                                         }
@@ -701,56 +721,59 @@ ApplicationWindow {
                                 }
                             }
                         }
-                        Label {
-                            width: parent.width
-                            horizontalAlignment: Text.AlignHCenter
-                            wrapMode: Text.Wrap
-                            text: qsTr("Current temperature %1").arg(app.confirmed
-                                  ? app.temperature(app.confirmed.current) : "—")
-                        }
-                        Flow {
+                        Row {
+                            id: heatingStatus
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: Math.min(parent.width, heatingStatus.width + modeStatus.width + spacing)
                             spacing: Theme.paddingSmall
                             visible: !!app.confirmed
+                            readonly property bool heating: !!app.confirmed && app.confirmed.heating
 
-                            Row {
-                                id: heatingStatus
-                                spacing: Theme.paddingSmall
-                                StatusIcon {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    kind: app.confirmed && app.confirmed.heating ? "heat" : "idle"
-                                    color: heatingLabel.color
-                                }
-                                Label {
-                                    id: heatingLabel
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    color: app.confirmed && app.confirmed.heating ? Theme.highlightColor : Theme.secondaryColor
-                                    text: app.confirmed && app.confirmed.heating ? qsTr("Heating") : qsTr("Not heating")
-                                }
+                            StatusIcon {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: heatingLabel.font.pixelSize
+                                kind: heatingStatus.heating ? "heat" : "idle"
+                                color: heatingLabel.color
                             }
-                            Row {
-                                id: modeStatus
-                                spacing: Theme.paddingSmall
-                                StatusIcon {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    kind: app.confirmed ? app.confirmed.mode : ""
-                                    color: Theme.secondaryColor
-                                }
-                                Label {
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    color: Theme.secondaryColor
-                                    text: app.confirmed ? app.modeLabel(app.confirmed.mode) : ""
-                                }
+                            Label {
+                                id: heatingLabel
+                                font.pixelSize: Theme.fontSizeLarge
+                                color: heatingStatus.heating ? "#e94343" : Theme.secondaryColor
+                                text: heatingStatus.heating ? qsTr("Heating") : qsTr("Not heating")
                             }
                         }
-                        Label {
-                            width: parent.width
-                            horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.secondaryColor
-                            visible: !app.confirmed
-                            text: "—"
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: Math.min(parent.width, temperatureLabel.implicitWidth + temperatureValue.width + spacing)
+                            spacing: Theme.paddingSmall
+
+                            Label {
+                                id: temperatureLabel
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - temperatureValue.width - parent.spacing
+                                wrapMode: Text.Wrap
+                                text: qsTr("Current temperature")
+                            }
+                            Label {
+                                id: temperatureValue
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.pixelSize: Theme.fontSizeExtraLarge
+                                text: app.confirmed ? app.temperature(app.confirmed.current) : "—"
+                            }
+                        }
+                    }
+                    DetailItem {
+                        id: modeDetail
+                        label: qsTr("Heating mode")
+                        value: app.confirmed ? app.modeLabel(app.confirmed.mode) : "—"
+                        _valueItem.leftPadding: modeIcon.visible ? modeIcon.width + Theme.paddingSmall : 0
+
+                        StatusIcon {
+                            id: modeIcon
+                            anchors.left: modeDetail._valueItem.left
+                            anchors.verticalCenter: modeDetail._valueItem.verticalCenter
+                            visible: !!app.confirmed
+                            kind: app.confirmed ? app.confirmed.mode : ""
+                            color: Theme.highlightColor
                         }
                     }
                     DetailItem {

@@ -26,6 +26,9 @@ thermostat.json
 /.codex/
 /.agents/
 
+# Separate Android project
+/android/
+
 # Build output and temporary files
 /build/
 /dist/
